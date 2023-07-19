@@ -29,13 +29,26 @@ function isProductInCart(cart, id) {
   return false;
 }
 
+// function calculateTotal(cart, req) {
+//   total = 0;
+//   for (let i = 0; i < cart.length; i++) {
+//     if (cart[i].sale - price) {
+//       total = total + (cart[i] + sale_price * cart[i] * quantity);
+//     } else {
+//       total = total + (cart[i].price * cart[i], quantity);
+//     }
+//   }
+//   req.session.total = total;
+//   return total;
+// }
+
 function calculateTotal(cart, req) {
-  total = 0;
+  let total = 0;
   for (let i = 0; i < cart.length; i++) {
-    if (cart[i].sale - price) {
-      total = total + (cart[i] + sale_price * cart[i] * quantity);
+    if (cart[i].sale_price) {
+      total = total + (cart[i].sale_price * cart[i].quantity);
     } else {
-      total = total + (cart[i].price * cart[i], quantity);
+      total = total + (cart[i].price * cart[i].quantity);
     }
   }
   req.session.total = total;
@@ -68,7 +81,7 @@ app.post("/add_to_cart", function (req, res) {
     price: price,
     sale_price: sale_price,
     quantity: quantity,
-    image: image,
+    image: image  
   };
 
   if (req.session.cart) {
@@ -95,4 +108,20 @@ app.get("/cart", function (req, res) {
   var total=req.session.total;
 
   res.render('pages/cart',{cart:cart,total:total});
+});
+
+app.post('/remove_product',function(req,res){
+
+  var id=req.body.id;
+  var cart=req.sessionStore.cart;
+
+  for(let i=0; i<cart.length; i++){
+    if(cart[i].id == id){
+      cart.splice(cart.indexOf(i),1);
+    }
+  }
+  //recalculate
+
+  calculateTotal(cart,req);
+  res.redirect('/cart');
 });
